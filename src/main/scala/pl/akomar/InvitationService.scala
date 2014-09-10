@@ -1,20 +1,18 @@
 package pl.akomar
 
-import spray.http.{StatusCodes, StatusCode}
+import pl.akomar.domain.Invitee
+import spray.http.StatusCodes
 import spray.routing.HttpService
 
 trait InvitationService extends HttpService {
+
+  import pl.akomar.domain.InviteeFormatter._
+  import spray.httpx.SprayJsonSupport._
+
   val invitationRoutes =
     path("invitation") {
       get {
-        complete {
-          """[
-            |  {
-            |    "invitee": "John Smith",
-            |    "email": "john@smith.mx"
-            |  }
-            |]"""
-        }
+        complete(List(Invitee("John Smith", "john@smith.mx")))
       } ~
         post {
           complete(StatusCodes.Created)

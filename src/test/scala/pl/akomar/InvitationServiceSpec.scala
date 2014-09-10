@@ -4,6 +4,8 @@ import akka.actor.ActorRefFactory
 import org.specs2.mutable.Specification
 import spray.http.StatusCodes
 import spray.testkit.Specs2RouteTest
+import spray.json._
+import DefaultJsonProtocol._
 
 class InvitationServiceSpec extends Specification with Specs2RouteTest with InvitationService {
   def actorRefFactory: ActorRefFactory = system
@@ -11,12 +13,12 @@ class InvitationServiceSpec extends Specification with Specs2RouteTest with Invi
   "InvitationService" should {
     "return 'John Smith' with email for GET request to /invitation path" in {
       Get("/invitation") ~> invitationRoutes ~> check {
-        responseAs[String] must beEqualTo("""[
-                                 |  {
-                                 |    "invitee": "John Smith",
-                                 |    "email": "john@smith.mx"
-                                 |  }
-                                 |]""").ignoreSpace
+        responseAs[String].parseJson must beEqualTo( """[
+                                                        {
+                                                          "invitee": "John Smith",
+                                                          "email": "john@smith.mx"
+                                                        }
+                                                        ]""".parseJson)
       }
     }
 
