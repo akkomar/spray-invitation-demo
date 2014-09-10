@@ -2,9 +2,11 @@ package pl.akomar
 
 import akka.actor.Actor.Receive
 import akka.actor.{ActorRefFactory, Actor}
+import com.typesafe.scalalogging.LazyLogging
 import pl.akomar.domain.Invitee
 import spray.http.StatusCodes
 import spray.routing.HttpService
+
 
 class InvitationServiceActor extends Actor with InvitationService {
   def receive: Receive = runRoute(invitationRoutes)
@@ -12,7 +14,7 @@ class InvitationServiceActor extends Actor with InvitationService {
   def actorRefFactory: ActorRefFactory = context
 }
 
-trait InvitationService extends HttpService {
+trait InvitationService extends HttpService with LazyLogging {
 
   import pl.akomar.domain.InviteeFormatter._
   import spray.httpx.SprayJsonSupport._
@@ -23,7 +25,10 @@ trait InvitationService extends HttpService {
         complete(List(Invitee("John Smith", "john@smith.mx")))
       } ~
         post {
-          complete(StatusCodes.Created)
+          entity(as[Invitee]) { invitee =>
+            logger.info(s"Received invitee: $invitee")
+            complete(StatusCodes.Created)
+          }
         }
     }
 }
