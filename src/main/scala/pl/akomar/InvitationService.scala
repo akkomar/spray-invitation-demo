@@ -1,8 +1,16 @@
 package pl.akomar
 
+import akka.actor.Actor.Receive
+import akka.actor.{ActorRefFactory, Actor}
 import pl.akomar.domain.Invitee
 import spray.http.StatusCodes
 import spray.routing.HttpService
+
+class InvitationServiceActor extends Actor with InvitationService {
+  def receive: Receive = runRoute(invitationRoutes)
+
+  def actorRefFactory: ActorRefFactory = context
+}
 
 trait InvitationService extends HttpService {
 
