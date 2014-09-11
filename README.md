@@ -14,4 +14,5 @@ or
 #### POST /invitation
     $ curl -i -H "Content-Type: application/json" -d '{"invitee": "John Smith","email": "john@smith.mx"}' http://localhost:8080/invitation
     
-    
+
+[![Build Status](https://travis-ci.org/akkomar/spray-invitation-demo.svg?branch=master)](https://travis-ci.org/akkomar/spray-invitation-demo)
