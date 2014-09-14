@@ -11,17 +11,40 @@ import scala.slick.lifted.{ProvenShape, Tag}
 
 //Data Access Layer
 
-trait H2DB extends LazyLogging {
+trait InviteeRepository {
+  def getInvitees(): List[Invitee]
+
+  def addInvitee(invitee: Invitee): Invitee
+}
+
+object InviteeRepository extends LazyLogging {
+  def configure(): InviteeRepository = {
+    logger.info("Configuring Invitee repository...")
+    import com.typesafe.config.ConfigFactory
+    val conf = ConfigFactory.load()
+    val repoParam = conf.getString("invitee.repository.impl")
+
+    if (repoParam == "H2DB") {
+      logger.info("Creating H2DBInviteeRepository")
+      val h2Repo = new H2DBInviteeRepository
+      h2Repo.createDB()
+      h2Repo
+    }
+    else {
+      logger.info("Creating ImmutableInviteeRepository")
+      new ImmutableInviteeRepository
+    }
+  }
+}
+
+class H2DBInviteeRepository extends InviteeRepository with LazyLogging {
   val invitees: TableQuery[InviteesTable] = TableQuery[InviteesTable]
   val db = Database.forURL("jdbc:h2:mem:invitationdb", driver = "org.h2.Driver")
-  implicit val session = db.createSession()
-
-  //    val m = new Model("H2", new DAL(H2Driver),
-  //      Database.forURL("jdbc:h2:mem:invitationdb", driver = "org.h2.Driver"))
-  //    m.createDB
+  implicit val implicitSession = db.createSession
 
   def createDB(): Unit = try {
     invitees.ddl.create
+    logger.info("H2DB created")
   } catch {
     case e: Exception => logger.info("Could not create database, assuming it already exists")
   }
@@ -33,17 +56,28 @@ trait H2DB extends LazyLogging {
   }
 
   def getInvitees(): List[Invitee] = {
+    logger.debug("Getting all invitees...")
     val result = invitees.list
-    println("Got invitees: " + result)
+    logger.debug("Got invitees: " + result)
     result
   }
 
-  def addInvitee(invitee: Invitee)/*: Invitee*/ = {
+  def addInvitee(invitee: Invitee): Invitee = {
     val result = invitees.insert(invitee)
     println("Inserted person: " + result)
-    result
+    invitee.copy()
   }
 
+}
+
+class ImmutableInviteeRepository extends InviteeRepository {
+  def getInvitees(): List[Invitee] = {
+    List(Invitee("John Smith", "john@smith.mx"))
+  }
+
+  def addInvitee(invitee: Invitee): Invitee = {
+    invitee.copy()
+  }
 }
 
 class InviteesTable(tag: Tag) extends Table[Invitee](tag, "INVITEES") {

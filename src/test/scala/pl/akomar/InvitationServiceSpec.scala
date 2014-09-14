@@ -7,10 +7,11 @@ import spray.testkit.Specs2RouteTest
 import spray.json._
 import DefaultJsonProtocol._
 
-class InvitationServiceSpec extends Specification with Specs2RouteTest with InvitationService {
+class InvitationServiceWithImmutableRepoSpec extends Specification with Specs2RouteTest with InvitationService {
   def actorRefFactory: ActorRefFactory = system
+  val inviteeRepository = new ImmutableInviteeRepository{}
 
-  "InvitationService" should {
+  "InvitationService backed by immutable repository" should {
     "return 'John Smith' with email for GET request to /invitation path" in {
       Get("/invitation") ~> invitationRoutes ~> check {
         responseAs[String].parseJson must beEqualTo( """[{"invitee": "John Smith","email": "john@smith.mx"}]""".parseJson)

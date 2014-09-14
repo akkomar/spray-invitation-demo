@@ -1,4 +1,6 @@
 ## Spray invitation service demo
+Invitee repository can be configured to use embedded H2 database or immutable stub containing one invitee.
+To configure, set `invitee.repository.impl` parameter to `H2DB` or `immutableList`.
 
 ### To compile and run tests:
     $ sbt test
